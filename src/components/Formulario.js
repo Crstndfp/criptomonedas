@@ -24,11 +24,11 @@ const Boton = styled.input`
     }
 `;
 
-const Formulario = () => {
+const Formulario = ({setCriptomoneda, setMoneda}) => {
 
     const MONEDAS = [
         { codigo: 'USD', nombre: 'Dolar de Estados Unidos' },
-        { codigo: 'QTZ', nombre: 'Quetzal' },
+        { codigo: 'GTQ', nombre: 'Quetzales de Guatenmala' },
         { codigo: 'EUR', nombre: 'Euro' },
         { codigo: 'GBP', nombre: 'Libra Esterlina' }
     ];
@@ -37,31 +37,32 @@ const Formulario = () => {
     const [listaCrypto, setListaCrypto] = useState([]);
     const [error, setError] = useState(false);
     // state de nuestro hook
-    const [moneda, SeleccionarMoneda, setMoneda] = useMoneda('Elige tu moneda', '', MONEDAS);
+    const [monedaSeleccionada, SelectMonedas, setMonedas] = useMoneda('Elige tu moneda', '', MONEDAS);
 
-    const [cryptoMoneda, Crypto, setCryptoMoneda] = useCriptomoneda('Elige tu criptomoneda', '', listaCrypto);
+    const [cryptoSeleccionada, SelectCriptomonedas, setCryptoMonedas] = useCriptomoneda('Elige tu criptomoneda', '', listaCrypto);
 
     //llamada a la API
     useEffect(() => {
         const request = async () => {
-            const url = 'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=USD';
+            const url = `https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=${(monedaSeleccionada === '')?'USD':monedaSeleccionada}`;
             const request = await axios.get(url);
-            console.log(request.data.Data);
             setListaCrypto(request.data.Data);
         }
 
         request();
-    }, []);
+    }, [monedaSeleccionada]);
 
     const cotizarMoneda = e => {
         e.preventDefault();
 
         // validar Datos llenos
-        if (moneda === '' || cryptoMoneda === '') {
+        if (monedaSeleccionada === '' || cryptoSeleccionada === '') {
             setError(true);
             return;
         }
         setError(false);
+        setCriptomoneda(cryptoSeleccionada);
+        setMoneda(monedaSeleccionada);
     }
 
     return (
@@ -69,8 +70,8 @@ const Formulario = () => {
             onSubmit={cotizarMoneda}
         >
             {error ? <Error mensaje="Todos los campos son obligatorios" /> : null}
-            <SeleccionarMoneda />
-            <Crypto />
+            <SelectMonedas />
+            <SelectCriptomonedas />
             <Boton type="submit" value="Calcular" />
         </form>
     );
